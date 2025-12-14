@@ -26,6 +26,23 @@ PUPPETEER_TOOLS = [
     "mcp__puppeteer__puppeteer_evaluate",
 ]
 
+# Playwright MCP tools for browser automation
+PLAYWRIGHT_TOOLS = [
+    "mcp__playwright__playwright_navigate",
+    "mcp__playwright__playwright_screenshot",
+    "mcp__playwright__playwright_click",
+    "mcp__playwright__playwright_fill",
+    "mcp__playwright__playwright_select",
+    "mcp__playwright__playwright_hover",
+    "mcp__playwright__playwright_evaluate",
+    "mcp__playwright__playwright_close",
+    "mcp__playwright__playwright_get_visible_text",
+    "mcp__playwright__playwright_get_visible_html",
+    "mcp__playwright__playwright_press_key",
+    "mcp__playwright__playwright_go_back",
+    "mcp__playwright__playwright_go_forward",
+]
+
 # Built-in tools
 BUILTIN_TOOLS = [
     "Read",
@@ -78,8 +95,9 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 # Bash permission granted here, but actual commands are validated
                 # by the bash_security_hook (see security.py for allowed commands)
                 "Bash(*)",
-                # Allow Puppeteer MCP tools for browser automation
+                # Allow browser automation MCP tools
                 *PUPPETEER_TOOLS,
+                *PLAYWRIGHT_TOOLS,
             ],
         },
     }
@@ -96,19 +114,25 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
     print("   - Sandbox enabled (OS-level bash isolation)")
     print(f"   - Filesystem restricted to: {project_dir.resolve()}")
     print("   - Bash commands restricted to allowlist (see security.py)")
-    print("   - MCP servers: puppeteer (browser automation)")
+    print("   - MCP servers: puppeteer, playwright (browser automation)")
     print()
 
     return ClaudeSDKClient(
         options=ClaudeCodeOptions(
             model=model,
-            system_prompt="You are an expert full-stack developer building a production-quality web application.",
+            system_prompt="""You are an expert full-stack developer building a production-quality web application.
+
+For browser automation and testing, use the Playwright MCP tools (mcp__playwright__*).
+Playwright supports advanced selectors like text='Button Text', :has-text(), and role selectors.
+Example: playwright_click with selector 'button:has-text("New Chat")' or 'text=New Chat'""",
             allowed_tools=[
                 *BUILTIN_TOOLS,
                 *PUPPETEER_TOOLS,
+                *PLAYWRIGHT_TOOLS,
             ],
             mcp_servers={
-                "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"]}
+                "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"]},
+                "playwright": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-playwright"]},
             },
             hooks={
                 "PreToolUse": [
