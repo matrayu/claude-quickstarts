@@ -11,7 +11,7 @@ before proceeding.
 
 ### CRITICAL FIRST TASK: Create feature_list.json
 
-Based on `app_spec.txt`, create a file called `feature_list.json` with 200 detailed
+Based on `app_spec.txt`, create a file called `feature_list.json` with 20 detailed
 end-to-end test cases. This file is the single source of truth for what
 needs to be built.
 
